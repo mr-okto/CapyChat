@@ -3,7 +3,7 @@ project(capy-chat)
 
 set(CMAKE_CXX_STANDARD 17)
 
-find_package(gnutls REQUIRED)
+find_package(GnuTLS REQUIRED)
 find_package(opendht REQUIRED)
 
 include_directories(/usr/local/include ./include)

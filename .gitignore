@@ -71,3 +71,7 @@ venv
 cmake-build*
 *~
 *.swp
+Makefile
+CMakeFiles
+*.cmake
+CMakeCache.txt
