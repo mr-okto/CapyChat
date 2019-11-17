@@ -2,6 +2,14 @@
 #include <vector>
 #include <cstdint>
 
+bool not_lambda(const std::vector<std::shared_ptr<dht::Value>>& values) {
+// Callback called when values are found
+    std::cout << "In lambda" << std::endl;
+    for (const auto& value : values)
+    std::cout << "Found value: " << *value << std::endl;
+    return false; // return false to stop the search
+}
+
 int main()
 {
 
@@ -16,20 +24,15 @@ int main()
     node.bootstrap("bootstrap.ring.cx", "4222");
 
     // put some data on the dht
-    std::vector<uint8_t> some_data(5, 10);
-    node.put("unique_key", some_data);
+    std::string some_data("Message");
+    dht::InfoHash key = dht::Hash<HASH_LEN>("unique_key");
+    node.put(key, some_data);
 
-    // put some data on the dht, signed with our generated private key
-    node.putSigned("unique_key_42", some_data);
-
-    // get data from the dht
-    node.get("other_unique_key", [](const std::vector<std::shared_ptr<dht::Value>>& values) {
-        // Callback called when values are found
-        for (const auto& value : values)
-            std::cout << "Found value: " << *value << std::endl;
-        return true; // return false to stop the search
-    });
-
+    // get data
+    auto val = node.get<std::string>(key);  // std::future
+    for (const auto& iter : val.get()) {
+        std::cout << iter << std::endl;
+    }
     // wait for dht threads to end
     node.join();
     return 0;
