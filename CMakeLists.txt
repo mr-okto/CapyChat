@@ -9,7 +9,10 @@ find_package(opendht REQUIRED)
 include_directories(/usr/local/include ./include)
 link_directories(/usr/local/lib)
 
-add_executable(main.exe src/main.cpp)
-target_link_libraries(main.exe opendht gnutls)
+add_executable(host_node src/host_node.cpp src/utils.cpp)
+target_link_libraries(host_node opendht gnutls)
+
+add_executable(client_node src/client_node.cpp src/utils.cpp)
+target_link_libraries(client_node opendht gnutls)
 
 add_subdirectory(bundled-tools)
