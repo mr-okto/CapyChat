@@ -1,5 +1,6 @@
 #include <opendht.h>
 #include "utils.h"
+#include "bundled_tools.h"
 
 
 // Local chat room node
@@ -16,17 +17,22 @@ int main(int argc, char* argv[]) {
     long port = (argc >= 2) ? std::strtol(argv[1], nullptr, 10) : 4222;
 
     // Launch a dht node on a new thread, using a generated RSA key pair
-    node.run(port, dht::crypto::generateIdentity(), true);
+    dht_params params;
+    params.port = port;
+
+    params.generate_identity = true;
+    auto dhtConf = get_dgt_config(params);
+    node.run(params.port, dhtConf.first, std::move(dhtConf.second));
+
+    std::cout << "OpenDHT node " << node.getNodeId() << " running on port "
+              << node.getBoundPort() << std::endl;
 
     if (port != 4222) {
         node.bootstrap("127.0.0.1", "4222");
         std::cout << "Bootstrapping localhost:4222" << std::endl;
     }
 
-    std::cout << "OpenDHT node " << node.getNodeId() << " running on port "
-              << node.getBoundPort() << std::endl;
-
-    dht::InfoHash key_hash = dht::Hash<HASH_LEN>(TEST_KEY);
+    dht::InfoHash key_hash = dht::Hash<HASH_LEN>::get(TEST_KEY);
 
     auto token = node.listen<dht::ImMessage>(key_hash, [&](dht::ImMessage&& msg) {
         if (node.getId() != msg.from) {
