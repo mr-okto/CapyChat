@@ -1,6 +1,3 @@
-//
-// Created by Maxim Myshonkov on 25/11/19.
-//
 #include "bundled_tools.h"
 
 std::map<std::string, std::string> parse_string_map(
@@ -259,12 +256,14 @@ dht_params parse_args(int argc, char **argv) {
     return params;
 }
 
-std::string readLine(const char *prefix) {
+std::string read_line(const char *prefix) {
     const char* line_read = readline(prefix);
     if (line_read && *line_read)
         add_history(line_read);
     return line_read ? std::string(line_read) : std::string("\0", 1);
 }
+
+ServiceRunner sig_runner;
 
 void signal_handler(int sig) {
     switch(sig) {

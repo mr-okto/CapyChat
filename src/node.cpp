@@ -3,11 +3,14 @@
 #include "bundled_tools.h"
 
 
-// Local chat room node
-// "./node" - start bootstrap node at localhost:4222
-// "./node <port>" - start client node, bootstrap localhost:4222
-// Type message to post message in room
-// Press Enter to print node status
+/* Local chat room node
+ *
+ * "./node" - start bootstrap node at localhost:4222
+ * "./node <port>" - start client node at <port> , bootstrap localhost:4222
+ * Type message to post message in room
+ * Press Enter to print node status
+*/
+
 int main(int argc, char* argv[]) {
     // Random message id generator
     std::uniform_int_distribution<dht::Value::Id> rand_id;
@@ -36,7 +39,8 @@ int main(int argc, char* argv[]) {
 
     auto token = node.listen<dht::ImMessage>(key_hash, [&](dht::ImMessage&& msg) {
         if (node.getId() != msg.from) {
-            std::cout << msg.from.toString() << " - " << msg.id << " - "
+            std::cout << "from " << msg.from.toString() << " - msg #" << msg.id
+                      << " - at "  << print_time(msg.date) << " - "
                       << msg.msg << std::endl;
         }
         return true;

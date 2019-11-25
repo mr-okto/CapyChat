@@ -98,7 +98,7 @@ void print_node_info(const dht::DhtRunner& node, const dht_params& params);
 
 dht_params parse_args(int argc, char** argv);
 
-std::string readLine(const char* prefix = PROMPT);
+std::string read_line(const char* prefix = PROMPT);
 
 class ServiceRunner {
 public:
@@ -109,8 +109,6 @@ private:
     std::mutex m;
     std::atomic_bool terminate {false};
 };
-
-ServiceRunner sig_runner;
 
 void signal_handler(int sig);
 
