@@ -12,7 +12,8 @@ link_directories(/usr/local/lib)
 add_executable(node
         src/node.cpp
         src/utils.cpp
-        src/bundled_tools.cpp)
+        src/bundled_tools.cpp
+        )
 
 target_link_libraries(node readline opendht gnutls)
 

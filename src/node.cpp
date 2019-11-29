@@ -5,10 +5,9 @@
 
 /* Local chat room node
  *
- * "./node" - start bootstrap node at localhost:4222
- * "./node <port>" - start client node at <port> , bootstrap localhost:4222
- * Type message to post message in room
- * Press Enter to print node status
+ * "./node <username>" - start bootstrap node at localhost:4222
+ * "./node <port> <username>" - start client node at <port> , bootstrap localhost:4222
+ * Type message text to post message in room
 */
 
 int main(int argc, char* argv[]) {
@@ -18,6 +17,7 @@ int main(int argc, char* argv[]) {
 
     dht::DhtRunner node;
     long port = (argc >= 2) ? std::strtol(argv[1], nullptr, 10) : 4222;
+    std::string username = (argc >= 3) ? argv[2] : "user";
 
     // Launch a dht node on a new thread, using a generated RSA key pair
     dht_params params;
@@ -35,37 +35,48 @@ int main(int argc, char* argv[]) {
         std::cout << "Bootstrapping localhost:4222" << std::endl;
     }
 
-    dht::InfoHash key_hash = dht::Hash<HASH_LEN>::get(TEST_KEY);
-
-    auto token = node.listen<dht::ImMessage>(key_hash, [&](dht::ImMessage&& msg) {
-        if (node.getId() != msg.from) {
-            std::cout << "from " << msg.from.toString() << " - msg #" << msg.id
-                      << " - at "  << print_time(msg.date) << " - "
-                      << msg.msg << std::endl;
-        }
-        return true;
-    });
+    dht::InfoHash room;
+    std::future<size_t> token;
 
     std::string msg_text;
+    bool in_chat = false;
     for (int i = 0; i < INT_MAX; i++) {
-        std::cout << " > ";
-        std::getline(std::cin, msg_text);
+        if (not in_chat) {
+            std::cout << "Room name: ";
+            std::string room_name;
+            std::getline(std::cin, room_name);
 
-        if (!msg_text.empty())
-        {
-            auto now = std::chrono::system_clock::to_time_t(
-                    std::chrono::system_clock::now());
-
-            dht::ImMessage new_msg(rand_id(rd), std::move(msg_text), now);
-            node.putSigned(key_hash, new_msg, print_publish_status);
+            room = dht::Hash<HASH_LEN>::get(room_name);
+            token = node.listen<dht::ImMessage>(room, [&](dht::ImMessage &&msg)
+                    {
+                        if (node.getId() != msg.from)
+                        {
+                            std::cout << "-> message from "
+                                      << msg.metadatas.at("username")
+                                      << " at " << print_time(msg.date)
+                                      << " - " << msg.msg << std::endl;
+                        }
+                        return true;
+                    });
+            in_chat = true;
         } else {
-            std::cout << "\n==========tick " << i << "==========" << std::endl;
-            print_info(node, key_hash);
+            std::getline(std::cin, msg_text);
+
+            if (msg_text == "q") {
+                // Leave room
+                node.cancelListen(room, token.share());
+                in_chat = false;
+
+            } else if (!msg_text.empty()) {
+                auto now = std::chrono::system_clock::to_time_t(
+                        std::chrono::system_clock::now());
+
+                dht::ImMessage new_msg(rand_id(rd), std::move(msg_text), now);
+                new_msg.metadatas.emplace("username", username);
+                node.putSigned(room, new_msg, print_publish_status);
+            }
         }
     }
-
-    // Leave room
-    node.cancelListen(key_hash, std::move(token));
     // Wait for dht threads to end
     node.join();
     return 0;
