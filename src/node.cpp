@@ -23,7 +23,7 @@ int main(int argc, char* argv[]) {
     dht_params params;
     params.port = port;
 
-    params.generate_identity = true;
+    params.save_identity = "keychain";
     auto dhtConf = get_dgt_config(params);
     node.run(params.port, dhtConf.first, std::move(dhtConf.second));
 
@@ -40,17 +40,20 @@ int main(int argc, char* argv[]) {
 
     std::string msg_text;
     bool in_chat = false;
-    for (int i = 0; i < INT_MAX; i++) {
+    while (true) {
         if (not in_chat) {
             std::cout << "Room name: ";
             std::string room_name;
             std::getline(std::cin, room_name);
-
+            if (room_name == "q") {
+                break;
+            }
             room = dht::Hash<HASH_LEN>::get(room_name);
             token = node.listen<dht::ImMessage>(room, [&](dht::ImMessage &&msg)
                     {
-                        if (node.getId() != msg.from)
-                        {
+                        if (msg.metadatas.find("capy") != msg.metadatas.end()
+                                and msg.metadatas.find("username") != msg.metadatas.end()
+                                and node.getId() != msg.from) {
                             std::cout << "-> message from "
                                       << msg.metadatas.at("username")
                                       << " at " << print_time(msg.date)

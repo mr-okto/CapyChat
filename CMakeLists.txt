@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD 17)
 find_package(GnuTLS REQUIRED)
 find_package(opendht REQUIRED)
 
-include_directories(/usr/local/include ./include ./bundled-tools)
+include_directories(/usr/local/include ./include)
 link_directories(/usr/local/lib)
 
 add_executable(node
