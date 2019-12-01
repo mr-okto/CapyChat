@@ -411,7 +411,7 @@ void signal_handler(int sig)
     }
 }
 
-void setupSignals()
+void setup_signals()
 {
 #ifndef WIN32_NATIVE
     signal(SIGCHLD,SIG_IGN); /* ignore child */

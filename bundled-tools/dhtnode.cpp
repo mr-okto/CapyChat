@@ -516,7 +516,7 @@ main(int argc, char **argv)
     if (params.daemonize) {
         daemonize();
     }
-    setupSignals();
+    setup_signals();
 
     auto node = std::make_shared<DhtRunner>();
     try {

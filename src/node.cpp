@@ -15,6 +15,8 @@ int main(int argc, char* argv[]) {
     std::uniform_int_distribution<dht::Value::Id> rand_id;
     std::mt19937_64 rd {dht::crypto::random_device{}()};
 
+    setup_signals();
+
     dht::DhtRunner node;
     long port = (argc >= 2) ? std::strtol(argv[1], nullptr, 10) : 4222;
     std::string username = (argc >= 3) ? argv[2] : "user";
@@ -22,8 +24,8 @@ int main(int argc, char* argv[]) {
     // Launch a dht node on a new thread, using a generated RSA key pair
     dht_params params;
     params.port = port;
+    params.save_identity = ""; // TODO: Does not work if not empty
 
-    params.save_identity = "keychain";
     auto dhtConf = get_dgt_config(params);
     node.run(params.port, dhtConf.first, std::move(dhtConf.second));
 
@@ -40,20 +42,17 @@ int main(int argc, char* argv[]) {
 
     std::string msg_text;
     bool in_chat = false;
-    while (true) {
+    for (int i = 0; i < INT_MAX; i++) {
         if (not in_chat) {
             std::cout << "Room name: ";
             std::string room_name;
             std::getline(std::cin, room_name);
-            if (room_name == "q") {
-                break;
-            }
+
             room = dht::Hash<HASH_LEN>::get(room_name);
             token = node.listen<dht::ImMessage>(room, [&](dht::ImMessage &&msg)
                     {
-                        if (msg.metadatas.find("capy") != msg.metadatas.end()
-                                and msg.metadatas.find("username") != msg.metadatas.end()
-                                and node.getId() != msg.from) {
+                        if (node.getId() != msg.from)
+                        {
                             std::cout << "-> message from "
                                       << msg.metadatas.at("username")
                                       << " at " << print_time(msg.date)
