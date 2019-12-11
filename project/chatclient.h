@@ -3,6 +3,8 @@
 
 #include <QObject>
 #include <QTcpSocket>
+#include <opendht.h>
+
 class QHostAddress;
 class QJsonDocument;
 class ChatClient : public QObject
@@ -12,8 +14,8 @@ class ChatClient : public QObject
 public:
     explicit ChatClient(QObject *parent = nullptr);
 public slots:
-    void connectToServer(const QHostAddress &address, quint16 port);
-    void login(const QString &userName);
+    void connectToServer(const QString &address);
+    void login(const QString &userName, const QString &roomName);
     void sendMessage(const QString &text);
     void disconnectFromHost();
 private slots:
@@ -31,6 +33,13 @@ private:
     QTcpSocket *m_clientSocket;
     bool m_loggedIn;
     void jsonReceived(const QString &data);
+    // Message id generator
+    std::uniform_int_distribution<dht::Value::Id> rand_id_m;
+    std::mt19937_64 rd {dht::crypto::random_device{}()};
+    dht::DhtRunner node;
+    dht::InfoHash room_m;
+    std::string username_m;
+    std::future<size_t> token_m;
 };
 
 #endif // CHATCLIENT_H

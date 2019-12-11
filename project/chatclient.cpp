@@ -6,57 +6,51 @@
 #include <QJsonObject>
 #include <QJsonValue>
 
+#include "bundled_tools.h"
+#include "utils.h"
+
 ChatClient::ChatClient(QObject *parent)
     : QObject(parent)
     , m_clientSocket(new QTcpSocket(this))
     , m_loggedIn(false)
 {
-    // Forward the connected and disconnected signals
-    connect(m_clientSocket, &QTcpSocket::connected, this, &ChatClient::connected);
-    connect(m_clientSocket, &QTcpSocket::disconnected, this, &ChatClient::disconnected);
-    // connect readyRead() to the slot that will take care of reading the data in
-    connect(m_clientSocket, &QTcpSocket::readyRead, this, &ChatClient::onReadyRead);
-    // Forward the error signal, QOverload is necessary as error() is overloaded, see the Qt docs
-    connect(m_clientSocket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this, &ChatClient::error);
-    // Reset the m_loggedIn variable when we disconnec. Since the operation is trivial we use a lambda instead of creating another slot
-    connect(m_clientSocket, &QTcpSocket::disconnected, this, [this]()->void{m_loggedIn = false;});
 }
 
-void ChatClient::login(const QString &userName)
+void ChatClient::login(const QString &userName, const QString &roomName)
 {
-    if (m_clientSocket->state() == QAbstractSocket::ConnectedState) { // if the client is connected
-        // create a QDataStream operating on the socket
-        QDataStream clientStream(m_clientSocket);
-        // set the version so that programs compiled with different versions of Qt can agree on how to serialise
-        clientStream.setVersion(QDataStream::Qt_5_7);
-        // Create the JSON we want to send
-        QJsonObject message;
-        message["type"] = QStringLiteral("login");
-        message["username"] = userName;
-        // send the JSON using QDataStream
-        clientStream << QJsonDocument(message).toJson(QJsonDocument::Compact);
-    }
+    room_m = dht::Hash<HASH_LEN>::get(roomName.toStdString());
+    token_m = node.listen<dht::ImMessage>(room_m, [&](dht::ImMessage &&msg)
+    {
+      if (node.getId() != msg.from)
+      {
+          auto from_user = QString::fromStdString(
+                  msg.metadatas.at("username"));
+          auto msg_data = QString::fromStdString(msg.msg);
+          emit messageReceived(from_user, msg_data);
+      }
+      return true;
+    });
+    m_loggedIn = true;
+    username_m = userName.toStdString();
+    emit loggedIn();
 }
 
 void ChatClient::sendMessage(const QString &text)
 {
     if (text.isEmpty())
         return; // We don't send empty messages
-    // create a QDataStream operating on the socket
-    QDataStream clientStream(m_clientSocket);
-    // set the version so that programs compiled with different versions of Qt can agree on how to serialise
-    clientStream.setVersion(QDataStream::Qt_5_7);
-    // Create the JSON we want to send
-    QJsonObject message;
-    message["type"] = QStringLiteral("message");
-    message["text"] = text;
-    // send the JSON using QDataStream
-    clientStream << QJsonDocument(message).toJson();
+
+    auto now = std::chrono::system_clock::to_time_t(
+            std::chrono::system_clock::now());
+    dht::ImMessage new_msg(rand_id_m(rd), std::move(text.toStdString()), now);
+    new_msg.metadatas.emplace("username", username_m);
+    node.putSigned(room_m, new_msg, print_publish_status);
 }
 
 void ChatClient::disconnectFromHost()
 {
-    m_clientSocket->disconnectFromHost();
+    node.join();
+    emit disconnected();
 }
 
 void ChatClient::jsonReceived(const QString &data)
@@ -75,7 +69,7 @@ void ChatClient::jsonReceived(const QString &data)
 //        const bool loginSuccess = resultVal.toBool();
 //        if (loginSuccess) {
 //            // we logged in succesfully and we notify it via the loggedIn signal
-            emit loggedIn();
+//            emit loggedIn();
 //            return;
 //        }
 //        // the login attempt failed, we extract the reason of the failure from the JSON
@@ -117,9 +111,25 @@ void ChatClient::jsonReceived(const QString &data)
 //    }
 }
 
-void ChatClient::connectToServer(const QHostAddress &address, quint16 port)
+void ChatClient::connectToServer(const QString &address)
 {
-    m_clientSocket->connectToHost(address, port);
+    dht_params params;
+    params.port = 4222;
+    params.log = false;
+
+    auto dhtConf = get_dgt_config(params);
+    try {
+        node.run(params.port, dhtConf.first, std::move(dhtConf.second));
+    } catch (dht::DhtException& e) {
+        node.run(0, dhtConf.first, std::move(dhtConf.second));
+    }
+
+    std::cout << "OpenDHT node " << node.getNodeId() << " running on port "
+              << node.getBoundPort() << std::endl;
+
+    node.bootstrap(address.toStdString(), "4222");
+    std::cout << "Bootstrapping" << address.toStdString() << ":4222" << std::endl;
+    emit connected();
 }
 
 void ChatClient::onReadyRead()

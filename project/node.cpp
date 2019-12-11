@@ -15,6 +15,8 @@ int main(int argc, char* argv[]) {
     std::uniform_int_distribution<dht::Value::Id> rand_id;
     std::mt19937_64 rd {dht::crypto::random_device{}()};
 
+//    setup_signals();
+
     dht::DhtRunner node;
     long port = (argc >= 2) ? std::strtol(argv[1], nullptr, 10) : 4222;
     std::string username = (argc >= 3) ? argv[2] : "user";
@@ -23,7 +25,13 @@ int main(int argc, char* argv[]) {
     dht_params params;
     params.port = port;
 
-    params.generate_identity = true;
+    params.log = false;
+    std::stringstream logfile;
+    logfile << "logger_" << username << ".log";
+    params.logfile = logfile.str();
+
+    params.save_identity = username;
+
     auto dhtConf = get_dgt_config(params);
     node.run(params.port, dhtConf.first, std::move(dhtConf.second));
 
@@ -40,11 +48,17 @@ int main(int argc, char* argv[]) {
 
     std::string msg_text;
     bool in_chat = false;
-    for (int i = 0; i < INT_MAX; i++) {
+    bool exit_now = false;
+    while (not exit_now) {
         if (not in_chat) {
             std::cout << "Room name: ";
             std::string room_name;
             std::getline(std::cin, room_name);
+            if (room_name == "q")
+            {
+                exit_now = true;
+                break;
+            }
 
             room = dht::Hash<HASH_LEN>::get(room_name);
             token = node.listen<dht::ImMessage>(room, [&](dht::ImMessage &&msg)
@@ -53,7 +67,8 @@ int main(int argc, char* argv[]) {
                         {
                             std::cout << "-> message from "
                                       << msg.metadatas.at("username")
-                                      << " at " << print_time(msg.date)
+                                      << " (CRT: " << msg.from.toString()
+                                      << ") at " << print_time(msg.date)
                                       << " - " << msg.msg << std::endl;
                         }
                         return true;

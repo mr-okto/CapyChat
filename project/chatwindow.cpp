@@ -22,7 +22,6 @@ ChatWindow::ChatWindow(QWidget *parent)
     // connect the signals from the chat client to the slots in this ui
     connect(m_chatClient, &ChatClient::connected, this, &ChatWindow::connectedToServer);
     connect(m_chatClient, &ChatClient::loggedIn, this, &ChatWindow::loggedIn);
-    connect(m_chatClient, &ChatClient::loginError, this, &ChatWindow::loginFailed);
     connect(m_chatClient, &ChatClient::messageReceived, this, &ChatWindow::messageReceived);
     connect(m_chatClient, &ChatClient::disconnected, this, &ChatWindow::disconnectedFromServer);
     connect(m_chatClient, &ChatClient::error, this, &ChatWindow::error);
@@ -46,7 +45,7 @@ void ChatWindow::attemptConnection()
     // We ask the user for the address of the server, we use 127.0.0.1 (aka localhost) as default
     const QString hostAddress = QInputDialog::getText(
         this
-        , tr("Chose Server")
+        , tr("Bootstrap Server")
         , tr("Server Address")
         , QLineEdit::Normal
         , QStringLiteral("127.0.0.1")
@@ -55,26 +54,28 @@ void ChatWindow::attemptConnection()
         return; // the user pressed cancel or typed nothing
     // disable the connect button to prevent the user clicking it again
     ui->connectButton->setEnabled(false);
-    // tell the client to connect to the host using the port 1967
-    m_chatClient->connectToServer(QHostAddress(hostAddress), 1967);
+    // tell the client to connect to the host
+    m_chatClient->connectToServer(hostAddress);
 }
 
 void ChatWindow::connectedToServer()
 {
     // once we connected to the server we ask the user for what username they would like to use
-    const QString newUsername = QInputDialog::getText(this, tr("Chose Username"), tr("Username"));
+    const QString newUsername = QInputDialog::getText(this, tr("Choose Username"), tr("Username"));
+    const QString newRoom = QInputDialog::getText(this, tr("Choose Room"), tr("Room"));
+
     if (newUsername.isEmpty()){
         // if the user clicked cancel or typed nothing, we just disconnect from the server
         return m_chatClient->disconnectFromHost();
     }
     // try to login with the given username
-    attemptLogin(newUsername);
+    attemptLogin(newUsername, newRoom);
 }
 
-void ChatWindow::attemptLogin(const QString &userName)
+void ChatWindow::attemptLogin(const QString &userName, const QString &roomName)
 {
     // use the client to attempt a log in with the given username
-    m_chatClient->login(userName);
+    m_chatClient->login(userName, roomName);
 }
 
 void ChatWindow::loggedIn()
