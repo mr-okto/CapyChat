@@ -12,24 +12,22 @@ class ChatWindow : public QWidget
     Q_DISABLE_COPY(ChatWindow)
 public:
     explicit ChatWindow(QWidget *parent = nullptr);
-    ~ChatWindow();
+    ~ChatWindow() override;
 private:
-    Ui::ChatWindow *ui;
-    ChatClient *m_chatClient;
-    QStandardItemModel *m_chatModel;
-    QString m_lastUserName;
+    Ui::ChatWindow *ui_m;
+    ChatClient *chat_client_m;
+    QStandardItemModel *chat_model_m;
+    QString last_username_m;
 private slots:
-    void attemptConnection();
-    void connectedToServer();
-    void attemptLogin(const QString &userName, const QString &roomName);
-    void loggedIn();
-    void loginFailed(const QString &reason);
-    void messageReceived(const QString &sender, const QString &text);
-    void sendMessage();
-    void disconnectedFromServer();
-    void userJoined(const QString &username);
-    void userLeft(const QString &username);
-    void error(QAbstractSocket::SocketError socketError);
+    void attempt_connection();
+    void connected_to_server();
+    void attempt_login(const QString &user_name, const QString &room_name);
+    void logged_in();
+    void message_received(const QString &sender, const QString &text);
+    void send_message();
+    void user_joined(const QString &username);
+    void user_left(const QString &username);
+    void error();
 };
 
 #endif // CHATWINDOW_H

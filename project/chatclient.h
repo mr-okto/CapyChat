@@ -5,8 +5,6 @@
 #include <QTcpSocket>
 #include <opendht.h>
 
-class QHostAddress;
-class QJsonDocument;
 class ChatClient : public QObject
 {
     Q_OBJECT
@@ -14,25 +12,19 @@ class ChatClient : public QObject
 public:
     explicit ChatClient(QObject *parent = nullptr);
 public slots:
-    void connectToServer(const QString &address);
-    void login(const QString &userName, const QString &roomName);
-    void sendMessage(const QString &text);
-    void disconnectFromHost();
-private slots:
-    void onReadyRead();
+    void connect_to_server(const QString &address);
+    void login(const QString &user_name, const QString &room_name);
+    void send_message(const QString &text);
+    void disconnect_from_host();
 signals:
     void connected();
-    void loggedIn();
-    void loginError(const QString &reason);
-    void disconnected();
-    void messageReceived(const QString &sender, const QString &text);
-    void error(QAbstractSocket::SocketError socketError);
-    void userJoined(const QString &username);
-    void userLeft(const QString &username);
+    void logged_in();
+    void message_received(const QString &sender, const QString &text);
+    void error();
+    void user_joined(const QString &username);
+    void user_left(const QString &username);
 private:
-    QTcpSocket *m_clientSocket;
-    bool m_loggedIn;
-    void jsonReceived(const QString &data);
+    bool logged_in_m;
     // Message id generator
     std::uniform_int_distribution<dht::Value::Id> rand_id_m;
     std::mt19937_64 rd {dht::crypto::random_device{}()};

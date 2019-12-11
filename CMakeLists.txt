@@ -7,26 +7,12 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-if(CMAKE_VERSION VERSION_LESS "3.7.0")
-    set(CMAKE_INCLUDE_CURRENT_DIR ON)
-endif()
-
 find_package(GnuTLS REQUIRED)
 find_package(opendht REQUIRED)
 find_package(Qt5 COMPONENTS Core Widgets Network Gui REQUIRED)
 
-
 include_directories(/usr/local/include ./include ./bundled-tools)
 link_directories(/usr/local/lib)
-
-add_executable(node
-        project/node.cpp
-        project/utils.cpp
-        project/bundled_tools.cpp
-        )
-
-target_link_libraries(node readline opendht gnutls)
-
 
 add_executable(chat
         project/chatwindow.ui
