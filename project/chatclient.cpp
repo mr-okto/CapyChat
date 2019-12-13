@@ -27,6 +27,7 @@ void ChatClient::login(const QString &user_name, const QString &room_name)
     });
     logged_in_m = true;
     username_m = user_name.toStdString();
+    send_message("connected");
     emit logged_in();
 }
 

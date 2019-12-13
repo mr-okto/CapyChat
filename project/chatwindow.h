@@ -14,6 +14,7 @@ public:
     explicit ChatWindow(QWidget *parent = nullptr);
     ~ChatWindow() override;
 private:
+    void closeEvent(QCloseEvent *event) override; 
     Ui::ChatWindow *ui_m;
     ChatClient *chat_client_m;
     QStandardItemModel *chat_model_m;

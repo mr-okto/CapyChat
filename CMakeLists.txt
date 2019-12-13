@@ -23,6 +23,6 @@ add_executable(chat
         project/bundled_tools.cpp
         )
 
-target_link_libraries(chat Qt5::Widgets Qt5::Network Qt5::Core Qt5::Gui readline opendht gnutls)
+target_link_libraries(chat Qt5::Widgets Qt5::Network Qt5::Core Qt5::Gui readline opendht gnutls stdc++fs)
 
 add_subdirectory(bundled-tools)
