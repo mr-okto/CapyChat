@@ -20,6 +20,7 @@ private:
     QStandardItemModel *chat_model_m;
     QString last_username_m;
 private slots:
+    void connection_to_other_room();
     void attempt_connection();
     void connected_to_server();
     void attempt_login(const QString &user_name, const QString &room_name);

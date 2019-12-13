@@ -17,7 +17,7 @@
    <item row="0" column="0" colspan="2">
     <widget class="QPushButton" name="connectButton">
      <property name="text">
-      <string>Connect</string>
+      <string>Connect to new room</string>
      </property>
     </widget>
    </item>

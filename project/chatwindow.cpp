@@ -28,7 +28,7 @@ ChatWindow::ChatWindow(QWidget *parent)
     connect(chat_client_m, &ChatClient::user_joined, this, &ChatWindow::user_joined);
     connect(chat_client_m, &ChatClient::user_left, this, &ChatWindow::user_left);
     // connect the connect button to a slot that will attempt the connection
-    connect(ui_m->connectButton, &QPushButton::clicked, this, &ChatWindow::attempt_connection);
+    connect(ui_m->connectButton, &QPushButton::clicked, this, &ChatWindow::connection_to_other_room);
     // connect the click of the "send" button and the press of the enter while typing to the slot that sends the message
     connect(ui_m->sendButton, &QPushButton::clicked, this, &ChatWindow::send_message);
     connect(ui_m->messageEdit, &QLineEdit::returnPressed, this, &ChatWindow::send_message);
@@ -61,6 +61,30 @@ ChatWindow::~ChatWindow()
     delete ui_m;
 }
 
+void ChatWindow::connection_to_other_room()
+{
+    chat_client_m->send_message("disconnected");
+    sleep(1);
+    chat_client_m->disconnect_from_host();
+    // We ask the user for the address of the server, we use 127.0.0.1 (aka localhost) as default
+    const QString hostAddress = QInputDialog::getText(
+        this
+        , tr("Bootstrap Server")
+        , tr("Server Address")
+        , QLineEdit::Normal
+        , QStringLiteral("127.0.0.1")
+    );
+    if (hostAddress.isEmpty())
+        return; // the user pressed cancel or typed nothing
+    // disable the connect button to prevent the user clicking it again
+    //ui_m->connectButton->setEnabled(false);
+    // tell the client to connect to the host
+    chat_client_m->connect_to_server(hostAddress);
+
+    chat_model_m->removeRows(0, chat_model_m->rowCount());
+
+}
+
 void ChatWindow::attempt_connection()
 {
     // We ask the user for the address of the server, we use 127.0.0.1 (aka localhost) as default
@@ -74,9 +98,12 @@ void ChatWindow::attempt_connection()
     if (hostAddress.isEmpty())
         return; // the user pressed cancel or typed nothing
     // disable the connect button to prevent the user clicking it again
-    ui_m->connectButton->setEnabled(false);
+    //ui_m->connectButton->setEnabled(false);
     // tell the client to connect to the host
     chat_client_m->connect_to_server(hostAddress);
+
+    chat_model_m->removeRows(0, chat_model_m->rowCount());
+
 }
 
 void ChatWindow::connected_to_server()
@@ -194,7 +221,7 @@ void ChatWindow::user_joined(const QString &username)
     last_username_m.clear();
 }
 void ChatWindow::user_left(const QString &username)
-{Do
+{
     // store the index of the new row to append to the model containing the messages
     const int newRow = chat_model_m->rowCount();
     // insert a row

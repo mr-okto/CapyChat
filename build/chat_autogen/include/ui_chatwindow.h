@@ -74,7 +74,7 @@ public:
     void retranslateUi(QWidget *ChatWindow)
     {
         ChatWindow->setWindowTitle(QApplication::translate("ChatWindow", "Capy Chat", Q_NULLPTR));
-        connectButton->setText(QApplication::translate("ChatWindow", "Connect", Q_NULLPTR));
+        connectButton->setText(QApplication::translate("ChatWindow", "Connect to new room", Q_NULLPTR));
         sendButton->setText(QApplication::translate("ChatWindow", "Send", Q_NULLPTR));
     } // retranslateUi
 
