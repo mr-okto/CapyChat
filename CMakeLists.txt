@@ -3,7 +3,6 @@ project(capy-chat)
 
 set(CMAKE_CXX_STANDARD 17)
 
-find_package(GnuTLS REQUIRED)
 find_package(opendht REQUIRED)
 
 include_directories(/usr/local/include ./include ./bundled-tools)
@@ -15,4 +14,4 @@ add_executable(bootstrap_node
         src/dht_config.cpp
         )
 
-target_link_libraries(bootstrap_node stdc++fs opendht gnutls)
+target_link_libraries(bootstrap_node opendht-static)

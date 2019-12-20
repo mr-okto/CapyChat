@@ -1,4 +1,3 @@
-#include <filesystem>
 #include "dht_config.h"
 
 std::vector<uint8_t> load_file(const std::string& path) {
@@ -19,30 +18,9 @@ std::vector<uint8_t> load_file(const std::string& path) {
 
 std::pair<dht::DhtRunner::Config, dht::DhtRunner::Context>
         get_dgt_config(dht_params& params) {
-    bool keychain = std::filesystem::exists(params.save_identity + ".pem")
-                    and std::filesystem::exists(params.save_identity + ".crt");
-    if (keychain) {
-        try {
-            params.id.first = std::make_shared<dht::crypto::PrivateKey>(
-                    load_file(params.save_identity + ".pem"),
-                    params.privkey_pwd);
-            params.id.second = std::make_shared<dht::crypto::Certificate>(
-                    load_file(params.save_identity + ".crt"));
-        } catch (const std::exception& e) {
-            throw std::runtime_error(std::string("Error loading RSA keypair: ")
-                                     + e.what());
-        }
-    } else {
-        auto node_ca = std::make_unique<dht::crypto::Identity>(
-                dht::crypto::generateEcIdentity("DHT Node CA"));
-        params.id = dht::crypto::generateIdentity("DHT Node", *node_ca);
-        if (not params.save_identity.empty()) {
-            dht::crypto::saveIdentity(*node_ca, params.save_identity + "_ca",
-                                      params.privkey_pwd);
-            dht::crypto::saveIdentity(params.id, params.save_identity,
-                                      params.privkey_pwd);
-        }
-    }
+    auto node_ca = std::make_unique<dht::crypto::Identity>(
+            dht::crypto::generateEcIdentity("DHT Node CA"));
+    params.id = dht::crypto::generateIdentity("DHT Node", *node_ca);
 
     dht::DhtRunner::Config config {};
     config.dht_config.node_config.network = params.network;
