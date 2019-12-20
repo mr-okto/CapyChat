@@ -1,5 +1,5 @@
-#ifndef CAPY_CHAT_BUNDLED_TOOLS_H
-#define CAPY_CHAT_BUNDLED_TOOLS_H
+#ifndef CAPY_CHAT_DHT_CONFIG_H
+#define CAPY_CHAT_DHT_CONFIG_H
 
 
 #include <opendht.h>
@@ -64,4 +64,4 @@ void setup_signals();
 
 void daemonize();
 
-#endif //CAPY_CHAT_BUNDLED_TOOLS_H
+#endif //CAPY_CHAT_DHT_CONFIG_H

@@ -1,14 +1,11 @@
 #include "utils.h"
 
-void print_info(dht::DhtRunner& node, const dht::InfoHash& key) {
+void print_info(dht::DhtRunner &node) {
     std::cout << "Node Stats: " << node.getNodeInfo().ipv4.toString();
-    std::cout << "Storage at " << TEST_KEY << ": " << node.getStorageLog(key)
-              << std::endl;
-    std::cout << "Known public addresses: [ ";
+    std::cout << "Known public addresses: " << std::endl;
     for (const dht::SockAddr& addr : node.getPublicAddress()) {
-        std::cout << addr.toString() << " ";
+        std::cout << addr.toString() << " " << std::endl;
     }
-    std::cout << "]" << std::endl;
 }
 
 void print_publish_status(bool success) {

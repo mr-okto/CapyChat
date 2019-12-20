@@ -9,12 +9,10 @@ find_package(opendht REQUIRED)
 include_directories(/usr/local/include ./include ./bundled-tools)
 link_directories(/usr/local/lib)
 
-add_executable(node
+add_executable(bootstrap_node
         src/node.cpp
         src/utils.cpp
-        src/bundled_tools.cpp
+        src/dht_config.cpp
         )
 
-target_link_libraries(node readline opendht gnutls)
-
-add_subdirectory(bundled-tools)
+target_link_libraries(bootstrap_node readline opendht gnutls)
