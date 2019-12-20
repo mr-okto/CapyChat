@@ -15,4 +15,4 @@ add_executable(bootstrap_node
         src/dht_config.cpp
         )
 
-target_link_libraries(bootstrap_node readline opendht gnutls)
+target_link_libraries(bootstrap_node opendht gnutls)

@@ -7,8 +7,6 @@
 #include <opendht/crypto.h>
 #include <opendht/network_utils.h>
 #include <getopt.h>
-#include <readline/readline.h>
-#include <readline/history.h>
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -46,7 +44,6 @@ std::pair<dht::DhtRunner::Config, dht::DhtRunner::Context>
         get_dgt_config(dht_params& params);
 
 void print_node_info(const dht::DhtRunner& node, const dht_params& params);
-
 
 class ServiceRunner {
 public:
