@@ -21,7 +21,8 @@ signals:
     void connected();
     void logged_in();
     void room_left();
-    void message_received(const QString &sender, const QString &text);
+    void message_received(const QString &sender, const QString &text,
+                          const QString &timestamp);
     void error();
     void user_joined(const QString &username);
     void user_left(const QString &username);

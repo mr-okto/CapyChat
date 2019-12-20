@@ -2,8 +2,8 @@
 
 void print_info(dht::DhtRunner& node, const dht::InfoHash& key) {
     std::cout << "Node Stats: " << node.getNodeInfo().ipv4.toString();
-    std::cout << "Storage at " << TEST_KEY << ": " << node.getStorageLog(key)
-              << std::endl;
+    std::cout << "Storage: " << node.getStoreSize().first <<
+            node.getStoreSize().second << std::endl;
     std::cout << "Known public addresses: [ ";
     for (const dht::SockAddr& addr : node.getPublicAddress()) {
         std::cout << addr.toString() << " ";
@@ -19,6 +19,7 @@ void print_publish_status(bool success) {
 
 std::string print_time(const std::time_t& now) {
     char buf[80];
-    strftime(buf, sizeof(buf), "%X", localtime(&now));
+    strftime(buf, sizeof(buf), "%R", localtime(&now));
+//    strftime(buf, sizeof(buf), "%R %d.%m", localtime(&now));
     return buf;
 }

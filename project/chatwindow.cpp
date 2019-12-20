@@ -6,6 +6,7 @@
 #include <QMessageBox>
 #include <QHostAddress>
 #include <QCloseEvent>
+#include <QFontDatabase>
 
 
 ChatWindow::ChatWindow(QWidget *parent)
@@ -14,6 +15,11 @@ ChatWindow::ChatWindow(QWidget *parent)
     , chat_client_m(new ChatClient(this)) // create the chat client
     , chat_model_m(new QStandardItemModel(this)) // create the model to hold the messages
 {
+//    int id = QFontDatabase::addApplicationFont("../forms/LinLibertine_R.ttf");
+//    QString family = QFontDatabase::applicationFontFamilies(id).at(0);
+//    QFont monospace(family);
+//    font_m = monospace;
+
     // set up of the .ui file
     ui_m->setupUi(this);
     // the model for the messages will have 1 column
@@ -23,7 +29,8 @@ ChatWindow::ChatWindow(QWidget *parent)
     // connect the signals from the chat client to the slots in this ui
     connect(chat_client_m, &ChatClient::connected, this, &ChatWindow::connected_to_server);
     connect(chat_client_m, &ChatClient::logged_in, this, &ChatWindow::logged_in);
-    connect(chat_client_m, &ChatClient::message_received, this, &ChatWindow::message_received);
+    connect(chat_client_m, &ChatClient::message_received, this,
+            &ChatWindow::message_received);
     connect(chat_client_m, &ChatClient::error, this, &ChatWindow::error);
     connect(chat_client_m, &ChatClient::user_joined, this, &ChatWindow::user_joined);
     connect(chat_client_m, &ChatClient::user_left, this, &ChatWindow::user_left);
@@ -79,7 +86,7 @@ void ChatWindow::attempt_connection()
         , tr("Bootstrap Server")
         , tr("Server Address")
         , QLineEdit::Normal
-        , QStringLiteral("127.0.0.1")
+        , QStringLiteral("3.121.25.185")
     );
     if (hostAddress.isEmpty())
         return; // the user pressed cancel or typed nothing
@@ -124,7 +131,8 @@ void ChatWindow::logged_in()
     last_username_m.clear();
 }
 
-void ChatWindow::message_received(const QString &sender, const QString &text)
+void ChatWindow::message_received(const QString &sender, const QString &text,
+                                  const QString &timestamp)
 {
     // store the index of the new row to append to the model containing the messages
     int newRow = chat_model_m->rowCount();
@@ -146,16 +154,17 @@ void ChatWindow::message_received(const QString &sender, const QString &text)
         last_username_m = sender;
         // create a bold default font
         QFont boldFont;
-        boldFont.setBold(true);
+        font_m.setBold(true);
         // insert 2 row, one for the message and one for the username
         chat_model_m->insertRows(newRow, 2);
         // store the username in the model
-        chat_model_m->setData(chat_model_m->index(newRow, 0), sender + ':');
+        chat_model_m->setData(chat_model_m->index(newRow, 0), sender + " (" + timestamp  + ")");
         // set the alignment for the username
         chat_model_m->setData(chat_model_m->index(newRow, 0), int(Qt::AlignLeft | Qt::AlignVCenter), Qt::TextAlignmentRole);
         // set the for the username
-        chat_model_m->setData(chat_model_m->index(newRow, 0), boldFont, Qt::FontRole);
+        chat_model_m->setData(chat_model_m->index(newRow, 0), font_m, Qt::FontRole);
         ++newRow;
+        font_m.setBold(false);
     } else {
         // insert a row for the message
         chat_model_m->insertRow(newRow);
@@ -164,6 +173,8 @@ void ChatWindow::message_received(const QString &sender, const QString &text)
     chat_model_m->setData(chat_model_m->index(newRow, 0), text);
     // set the alignment for the message
     chat_model_m->setData(chat_model_m->index(newRow, 0), int(Qt::AlignLeft | Qt::AlignVCenter), Qt::TextAlignmentRole);
+    // set the for the message
+    chat_model_m->setData(chat_model_m->index(newRow, 0), font_m, Qt::FontRole);
     // scroll the view to display the new message
     ui_m->chatView->scrollToBottom();
 }

@@ -1,8 +1,5 @@
 #include "chatclient.h"
 #include <QDataStream>
-#include <QJsonParseError>
-#include <QJsonObject>
-#include <QJsonValue>
 
 #include "bundled_tools.h"
 #include "utils.h"
@@ -21,7 +18,8 @@ void ChatClient::login(const QString &room_name)
           auto from_user = QString::fromStdString(
                   msg.metadatas.at("username"));
           auto msg_data = QString::fromStdString(msg.msg);
-          emit message_received(from_user, msg_data);
+          auto timestamp = QString::fromStdString(print_time(msg.date));
+          emit message_received(from_user, msg_data, timestamp);
       }
       return true;
     });
@@ -38,7 +36,7 @@ void ChatClient::send_message(const QString &text)
             std::chrono::system_clock::now());
     dht::ImMessage new_msg(rand_id_m(rd), std::move(text.toStdString()), now);
     new_msg.metadatas.emplace("username", username_m);
-    node.putSigned(room_m, new_msg, print_publish_status);
+    node.putSigned(room_m, new_msg, print_publish_status, true);
 }
 
 void ChatClient::leave_room()
@@ -59,14 +57,17 @@ ChatClient::connect_to_server(const QString &address, const QString &username)
     params.port = 4222;
     params.log = false;
 
-    username_m = username.toStdString();
-
     auto dhtConf = get_dgt_config(params);
     try {
         node.run(params.port, dhtConf.first, std::move(dhtConf.second));
     } catch (dht::DhtException& e) {
         node.run(0, dhtConf.first, std::move(dhtConf.second));
     }
+
+    std::string node_id = node.getNodeId().toString();
+
+    username_m = username.toStdString() + " [" + node_id.substr(node_id.length() - 4) + "]";
+
 
     std::cout << "OpenDHT node " << node.getNodeId() << " running on port "
               << node.getBoundPort() << std::endl;

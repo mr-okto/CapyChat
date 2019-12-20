@@ -19,13 +19,15 @@ private:
     ChatClient *chat_client_m;
     QStandardItemModel *chat_model_m;
     QString last_username_m;
+    QFont font_m;
 private slots:
     void connection_to_other_room();
     void attempt_connection();
     void connected_to_server();
     void attempt_login(const QString &room_name);
     void logged_in();
-    void message_received(const QString &sender, const QString &text);
+    void message_received(const QString &sender, const QString &text,
+                          const QString &timestamp);
     void send_message();
     void user_joined(const QString &username);
     void user_left(const QString &username);
