@@ -64,25 +64,11 @@ ChatWindow::~ChatWindow()
 void ChatWindow::connection_to_other_room()
 {
     chat_client_m->send_message("disconnected");
-    sleep(1);
-    chat_client_m->disconnect_from_host();
-    // We ask the user for the address of the server, we use 127.0.0.1 (aka localhost) as default
-    const QString hostAddress = QInputDialog::getText(
-        this
-        , tr("Bootstrap Server")
-        , tr("Server Address")
-        , QLineEdit::Normal
-        , QStringLiteral("127.0.0.1")
-    );
-    if (hostAddress.isEmpty())
-        return; // the user pressed cancel or typed nothing
-    // disable the connect button to prevent the user clicking it again
-    //ui_m->connectButton->setEnabled(false);
+    chat_client_m->leave_room();
+
     // tell the client to connect to the host
-    chat_client_m->connect_to_server(hostAddress);
-
+    connected_to_server();
     chat_model_m->removeRows(0, chat_model_m->rowCount());
-
 }
 
 void ChatWindow::attempt_connection()
@@ -97,10 +83,12 @@ void ChatWindow::attempt_connection()
     );
     if (hostAddress.isEmpty())
         return; // the user pressed cancel or typed nothing
-    // disable the connect button to prevent the user clicking it again
-    //ui_m->connectButton->setEnabled(false);
+
+    const QString newUsername = QInputDialog::getText(
+            this, tr("Choose Username"), tr("Username"));
+
     // tell the client to connect to the host
-    chat_client_m->connect_to_server(hostAddress);
+    chat_client_m->connect_to_server(hostAddress, newUsername);
 
     chat_model_m->removeRows(0, chat_model_m->rowCount());
 
@@ -109,22 +97,21 @@ void ChatWindow::attempt_connection()
 void ChatWindow::connected_to_server()
 {
     // once we connected to the server we ask the user for what username they would like to use
-    const QString newUsername = QInputDialog::getText(this, tr("Choose Username"), tr("Username"));
     const QString newRoom = QInputDialog::getText(this, tr("Choose Room"), tr("Room"));
 
-    if (newUsername.isEmpty())
+    if (newRoom.isEmpty())
     {
         // if the user clicked cancel or typed nothing, we just disconnect from the server
         return chat_client_m->disconnect_from_host();
     }
     // try to login with the given username
-    attempt_login(newUsername, newRoom);
+    attempt_login(newRoom);
 }
 
-void ChatWindow::attempt_login(const QString &user_name, const QString &room_name)
+void ChatWindow::attempt_login(const QString &room_name)
 {
     // use the client to attempt a log in with the given username
-    chat_client_m->login(user_name, room_name);
+    chat_client_m->login(room_name);
 }
 
 void ChatWindow::logged_in()

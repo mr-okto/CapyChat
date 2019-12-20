@@ -11,7 +11,7 @@ ChatClient::ChatClient(QObject *parent)
     : QObject(parent)
     , logged_in_m(false) {}
 
-void ChatClient::login(const QString &user_name, const QString &room_name)
+void ChatClient::login(const QString &room_name)
 {
     room_m = dht::Hash<HASH_LEN>::get(room_name.toStdString());
     token_m = node.listen<dht::ImMessage>(room_m, [&](dht::ImMessage &&msg)
@@ -26,7 +26,6 @@ void ChatClient::login(const QString &user_name, const QString &room_name)
       return true;
     });
     logged_in_m = true;
-    username_m = user_name.toStdString();
     send_message("connected");
     emit logged_in();
 }
@@ -42,16 +41,25 @@ void ChatClient::send_message(const QString &text)
     node.putSigned(room_m, new_msg, print_publish_status);
 }
 
+void ChatClient::leave_room()
+{
+    node.cancelListen(room_m, std::move(token_m));
+    emit room_left();
+}
+
 void ChatClient::disconnect_from_host()
 {
     node.join();
 }
 
-void ChatClient::connect_to_server(const QString &address)
+void
+ChatClient::connect_to_server(const QString &address, const QString &username)
 {
     dht_params params;
     params.port = 4222;
     params.log = false;
+
+    username_m = username.toStdString();
 
     auto dhtConf = get_dgt_config(params);
     try {

@@ -12,13 +12,15 @@ class ChatClient : public QObject
 public:
     explicit ChatClient(QObject *parent = nullptr);
 public slots:
-    void connect_to_server(const QString &address);
-    void login(const QString &user_name, const QString &room_name);
+    void connect_to_server(const QString &address, const QString &username);
+    void login(const QString &room_name);
     void send_message(const QString &text);
+    void leave_room();
     void disconnect_from_host();
 signals:
     void connected();
     void logged_in();
+    void room_left();
     void message_received(const QString &sender, const QString &text);
     void error();
     void user_joined(const QString &username);
