@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.13)
 project(capy-chat)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -20,9 +20,7 @@ add_executable(chat
         project/chatwindow.cpp
         project/clientmain.cpp
         project/utils.cpp
-        project/bundled_tools.cpp
+        project/node_tools.cpp
         )
 
-target_link_libraries(chat Qt5::Widgets Qt5::Network Qt5::Core Qt5::Gui readline opendht gnutls stdc++fs)
-
-add_subdirectory(bundled-tools)
+target_link_libraries(chat Qt5::Widgets Qt5::Network Qt5::Core Qt5::Gui readline opendht-static gnutls stdc++fs)

@@ -3,7 +3,10 @@
 
 #include <opendht.h>
 
-#define TEST_KEY "msg_key"
+#define BOOTSTRAP_IP "3.121.25.185"
+#define TYPE_MSG "message"
+#define TYPE_LEFT "user_left"
+#define TYPE_CONNECTED "user_connected"
 
 void print_info(dht::DhtRunner &node, const dht::InfoHash &key);
 void print_publish_status(bool success);

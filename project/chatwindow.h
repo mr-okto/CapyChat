@@ -27,7 +27,7 @@ private slots:
     void attempt_login(const QString &room_name);
     void logged_in();
     void message_received(const QString &sender, const QString &text,
-                          const QString &timestamp);
+                          const QString &type, const QString &timestamp);
     void send_message();
     void user_joined(const QString &username);
     void user_left(const QString &username);

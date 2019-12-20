@@ -1,7 +1,7 @@
 #include "chatclient.h"
 #include <QDataStream>
 
-#include "bundled_tools.h"
+#include "node_tools.h"
 #include "utils.h"
 
 ChatClient::ChatClient(QObject *parent)
@@ -17,18 +17,19 @@ void ChatClient::login(const QString &room_name)
       {
           auto from_user = QString::fromStdString(
                   msg.metadatas.at("username"));
+          auto msg_type = QString::fromStdString(
+                  msg.metadatas.at("type"));
           auto msg_data = QString::fromStdString(msg.msg);
           auto timestamp = QString::fromStdString(print_time(msg.date));
-          emit message_received(from_user, msg_data, timestamp);
+          emit message_received(from_user, msg_type, msg_data, timestamp);
       }
       return true;
     });
     logged_in_m = true;
-    send_message("connected");
     emit logged_in();
 }
 
-void ChatClient::send_message(const QString &text)
+void ChatClient::send_message(const QString &type, const QString &text)
 {
     if (text.isEmpty())
         return;
@@ -36,6 +37,7 @@ void ChatClient::send_message(const QString &text)
             std::chrono::system_clock::now());
     dht::ImMessage new_msg(rand_id_m(rd), std::move(text.toStdString()), now);
     new_msg.metadatas.emplace("username", username_m);
+    new_msg.metadatas.emplace("type", type.toStdString());
     node.putSigned(room_m, new_msg, print_publish_status, true);
 }
 
