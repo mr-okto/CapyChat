@@ -21,6 +21,6 @@ add_executable(chat
         project/clientmain.cpp
         project/utils.cpp
         project/node_tools.cpp
-        )
+        project/ChatMessage.cpp)
 
-target_link_libraries(chat Qt5::Widgets Qt5::Network Qt5::Core Qt5::Gui readline opendht-static gnutls stdc++fs)
+target_link_libraries(chat Qt5::Widgets Qt5::Network Qt5::Core Qt5::Gui readline opendht gnutls stdc++fs)

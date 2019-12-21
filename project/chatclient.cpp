@@ -3,6 +3,7 @@
 
 #include "node_tools.h"
 #include "utils.h"
+#include "ChatMessage.h"
 
 ChatClient::ChatClient(QObject *parent)
     : QObject(parent)
@@ -11,7 +12,7 @@ ChatClient::ChatClient(QObject *parent)
 void ChatClient::login(const QString &room_name)
 {
     room_m = dht::Hash<HASH_LEN>::get(room_name.toStdString());
-    token_m = node.listen<dht::ImMessage>(room_m, [&](dht::ImMessage &&msg)
+    token_m = node.listen<ChatMessage>(room_m, [&](ChatMessage &&msg)
     {
       if (node.getId() != msg.from)
       {
@@ -35,7 +36,7 @@ void ChatClient::send_message(const QString &type, const QString &text)
         return;
     auto now = std::chrono::system_clock::to_time_t(
             std::chrono::system_clock::now());
-    dht::ImMessage new_msg(rand_id_m(rd), std::move(text.toStdString()), now);
+    ChatMessage new_msg(rand_id_m(rd), std::move(text.toStdString()), now);
     new_msg.metadatas.emplace("username", username_m);
     new_msg.metadatas.emplace("type", type.toStdString());
     node.putSigned(room_m, new_msg, print_publish_status, true);
