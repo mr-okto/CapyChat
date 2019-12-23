@@ -9,6 +9,7 @@
 
 int main(int argc, char* argv[]) {
     dht::DhtRunner node;
+
     long port = (argc >= 2) ? std::strtol(argv[1], nullptr, 10) : 4222;
 
     // Launch a dht node on a new thread, using a generated RSA key pair
@@ -34,7 +35,21 @@ int main(int argc, char* argv[]) {
                 print_info(node);
             }
     }
-    // Wait for dht threads to end
+    // Ending node work
+    std::condition_variable cv;
+    std::mutex m;
+    bool done {false};
+
+    node.shutdown([&]()
+                   {
+                       done = true;
+                       cv.notify_all();
+                   });
+
+    // wait for shutdown
+    std::unique_lock<std::mutex> lk(m);
+    cv.wait(lk, [&](){ return done; });
+
     node.join();
     return 0;
 }

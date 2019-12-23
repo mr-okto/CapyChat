@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.13)
 project(capy-chat)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -14,4 +14,4 @@ add_executable(bootstrap_node
         src/dht_config.cpp
         )
 
-target_link_libraries(bootstrap_node opendht-static)
+target_link_libraries(bootstrap_node opendht)
