@@ -49,6 +49,19 @@ void ChatClient::leave_room()
 
 void ChatClient::disconnect_from_host()
 {
+    std::condition_variable cv;
+    std::mutex m;
+    bool done {false};
+
+    node.shutdown([&]()
+        {
+            done = true;
+            cv.notify_all();
+        });
+
+    std::unique_lock<std::mutex> lk(m);
+    cv.wait(lk, [&](){ return done; });
+
     node.join();
 }
 
@@ -58,6 +71,7 @@ ChatClient::connect_to_server(const QString &address, const QString &username)
     dht_params params;
     params.port = 4222;
     params.log = false;
+    params.persist_path = "~/.dht-chat/node.state";
 
     auto dhtConf = get_dgt_config(params);
     try {

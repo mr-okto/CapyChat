@@ -49,10 +49,10 @@ void ChatWindow::closeEvent(QCloseEvent *event)
     else if (ret == QMessageBox::Yes)
     {
         chat_client_m->send_message(TYPE_LEFT, "disconnected");
+        sleep(1);
         chat_client_m->disconnect_from_host();
         event->accept();
     }
-
 }
 
 ChatWindow::~ChatWindow()
@@ -120,13 +120,13 @@ void ChatWindow::message_received(const QString &sender, const QString &type,
                                   const QString &timestamp)
 {
     int newRow = chat_model_m->rowCount();
-    if (text == "connected")
+    if (type == TYPE_CONNECTED)
     {
         user_joined(sender);
         return;
     }
 
-    if (text == "disconnected")
+    if (type == TYPE_LEFT)
     {
         user_left(sender);
         return;
