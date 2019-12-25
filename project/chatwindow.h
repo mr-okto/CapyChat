@@ -11,6 +11,7 @@ class ChatWindow : public QWidget
     Q_OBJECT
     Q_DISABLE_COPY(ChatWindow)
 public:
+    QString StatusUsername;
     explicit ChatWindow(QWidget *parent = nullptr);
     ~ChatWindow() override;
 private:

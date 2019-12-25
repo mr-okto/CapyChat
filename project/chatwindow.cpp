@@ -7,6 +7,11 @@
 #include <QCloseEvent>
 #include <QFontDatabase>
 
+#include <iostream>
+#include <fstream>
+#include <string>
+
+
 #include "ui_chatwindow.h"
 #include "chatclient.h"
 #include "utils.h"
@@ -21,6 +26,7 @@ ChatWindow::ChatWindow(QWidget *parent)
     ui_m->setupUi(this);
     chat_model_m->insertColumn(0);
     ui_m->chatView->setModel(chat_model_m);
+    ui_m->StatusBar->setAlignment(Qt::AlignCenter);
 
     connect(chat_client_m, &ChatClient::connected, this, &ChatWindow::connected_to_server);
     connect(chat_client_m, &ChatClient::logged_in, this, &ChatWindow::logged_in);
@@ -71,18 +77,86 @@ void ChatWindow::connection_to_other_room()
 
 void ChatWindow::attempt_connection()
 {
-    const QString hostAddress = QInputDialog::getText(
-        this
-        , tr("Bootstrap Server")
-        , tr("Server Address")
-        , QLineEdit::Normal
-        , QStringLiteral(BOOTSTRAP_IP)
-    );
-    if (hostAddress.isEmpty())
-        return;
+    std::fstream file;
 
-    const QString newUsername = QInputDialog::getText(
-            this, tr("Choose Username"), tr("Username"));
+    std::string ip;
+    std::string nickname;
+
+    QString hostAddress;
+    QString newUsername;
+
+    file.open(AUTO_INPUT_DATA, std::ios::in);
+
+    if (file.is_open() && file >> ip && file >> nickname)
+    {
+        file.close();
+
+        hostAddress = QInputDialog::getText(
+            this
+            , tr("Bootstrap Server")
+            , tr("Server Address")
+            , QLineEdit::Normal
+            , QString::fromStdString(ip));
+        if (hostAddress.isEmpty())
+        {
+            ui_m->StatusBar->setText("Choosen nick - " + StatusUsername + "    " + "Room name - ");
+            return;
+        }
+
+        newUsername = QInputDialog::getText(
+                this
+                , tr("Choose Username")
+                , tr("Username")
+                , QLineEdit::Normal
+                , QString::fromStdString(nickname));
+        if (newUsername.isEmpty())
+        {
+            ui_m->StatusBar->setText("Choosen nick - " + StatusUsername + "    " + "Room name - ");
+            return;
+        }
+
+        file.open(AUTO_INPUT_DATA, std::ios::out);
+
+        file << hostAddress.toStdString() << std::endl;
+        file << newUsername.toStdString() << std::endl;
+
+        file.close();
+    }
+    else
+    {
+        hostAddress = QInputDialog::getText(
+            this
+            , tr("Bootstrap Server")
+            , tr("Server Address")
+        );
+        if (hostAddress.isEmpty())
+        {
+            ui_m->StatusBar->setText("Choosen nick - " + StatusUsername + "    " + "Room name - ");
+            return;
+        }
+
+        newUsername = QInputDialog::getText(
+                this
+                , tr("Choose Username")
+                , tr("Username")
+        );
+        if (newUsername.isEmpty())
+        {
+            ui_m->StatusBar->setText("Choosen nick - " + StatusUsername + "    " + "Room name - ");
+            return;
+        }
+
+        file.open(AUTO_INPUT_DATA, std::ios::out);
+
+        file << hostAddress.toStdString() << std::endl;
+        file << newUsername.toStdString() << std::endl;
+
+        file.close();
+    }
+
+    ui_m->StatusBar->setText("Choosen nick - " + newUsername);
+
+    StatusUsername = newUsername;
 
     chat_client_m->connect_to_server(hostAddress, newUsername);
 
@@ -96,11 +170,14 @@ void ChatWindow::connected_to_server()
 
     if (newRoom.isEmpty())
     {
+        ui_m->StatusBar->setText("Choosen nick - " + StatusUsername + "    " + "Room name - " + newRoom);
         return chat_client_m->disconnect_from_host();
     }
     attempt_login(newRoom);
-}
 
+    ui_m->StatusBar->setText("Choosen nick - " + StatusUsername + "    " + "Room name - " + newRoom);
+}
+    
 void ChatWindow::attempt_login(const QString &room_name)
 {
     chat_client_m->login(room_name);
@@ -112,6 +189,8 @@ void ChatWindow::logged_in()
     ui_m->sendButton->setEnabled(true);
     ui_m->messageEdit->setEnabled(true);
     ui_m->chatView->setEnabled(true);
+    ui_m->StatusBar->setEnabled(true);
+    ui_m->StatusBar->setAlignment(Qt::AlignCenter);
     last_username_m.clear();
 }
 

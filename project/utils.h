@@ -7,6 +7,7 @@
 #define TYPE_MSG "message"
 #define TYPE_LEFT "user_left"
 #define TYPE_CONNECTED "user_connected"
+#define AUTO_INPUT_DATA "auto_input_data.txt"
 
 void print_info(dht::DhtRunner &node, const dht::InfoHash &key);
 void print_publish_status(bool success);
