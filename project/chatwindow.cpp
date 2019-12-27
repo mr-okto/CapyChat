@@ -17,6 +17,7 @@ ChatWindow::ChatWindow(QWidget *parent)
     , ui_m(new Ui::ChatWindow)
     , chat_client_m(new ChatClient(this))
     , chat_model_m(new QStandardItemModel(this))
+    , room_name_m()
     {
     ui_m->setupUi(this);
     chat_model_m->insertColumn(0);
@@ -78,27 +79,27 @@ void ChatWindow::attempt_connection()
         , QLineEdit::Normal
         , QStringLiteral(BOOTSTRAP_IP)
     );
-    if (hostAddress.isEmpty())
-        return;
 
     const QString newUsername = QInputDialog::getText(
             this, tr("Choose Username"), tr("Username"));
 
+    if (newUsername.isEmpty())
+        newUsername.fromStdString("User");
+
     chat_client_m->connect_to_server(hostAddress, newUsername);
 
     chat_model_m->removeRows(0, chat_model_m->rowCount());
-
 }
 
 void ChatWindow::connected_to_server()
 {
-    const QString newRoom = QInputDialog::getText(this, tr("Choose Room"), tr("Room"));
+    room_name_m = QInputDialog::getText(this, tr("Choose Room"), tr("Room"));
 
-    if (newRoom.isEmpty())
+    if (room_name_m.isEmpty())
     {
         return chat_client_m->disconnect_from_host();
     }
-    attempt_login(newRoom);
+    attempt_login(room_name_m);
 }
 
 void ChatWindow::attempt_login(const QString &room_name)
@@ -109,6 +110,7 @@ void ChatWindow::attempt_login(const QString &room_name)
 void ChatWindow::logged_in()
 {
     chat_client_m->send_message(TYPE_CONNECTED, "connected");
+    ChatWindow::setWindowTitle("Room " + room_name_m);
     ui_m->sendButton->setEnabled(true);
     ui_m->messageEdit->setEnabled(true);
     ui_m->chatView->setEnabled(true);
@@ -132,6 +134,18 @@ void ChatWindow::message_received(const QString &sender, const QString &type,
         return;
     }
 
+    if (type == TYPE_MY_MSG)
+    {
+        chat_model_m->insertRow(newRow);
+        chat_model_m->setData(chat_model_m->index(newRow, 0),
+                " (" + timestamp + "): " + text);
+        chat_model_m->setData(chat_model_m->index(newRow, 0),
+                int(Qt::AlignRight | Qt::AlignVCenter), Qt::TextAlignmentRole);
+        ui_m->chatView->scrollToBottom();
+        last_username_m.clear();
+        return;
+    }
+
     // Show sender username
     if (last_username_m != sender) {
         // store the last displayed username
@@ -140,7 +154,7 @@ void ChatWindow::message_received(const QString &sender, const QString &type,
         font_m.setBold(true);
         chat_model_m->insertRows(newRow, 2);
         chat_model_m->setData(chat_model_m->index(newRow, 0),
-                sender + " (" + timestamp  + ")");
+                sender);
         chat_model_m->setData(chat_model_m->index(newRow, 0),
                 int(Qt::AlignLeft | Qt::AlignVCenter), Qt::TextAlignmentRole);
         chat_model_m->setData(chat_model_m->index(newRow, 0),
@@ -150,7 +164,7 @@ void ChatWindow::message_received(const QString &sender, const QString &type,
     } else {
         chat_model_m->insertRow(newRow);
     }
-    chat_model_m->setData(chat_model_m->index(newRow, 0), text);
+    chat_model_m->setData(chat_model_m->index(newRow, 0)," (" + timestamp + "): " + text);
     chat_model_m->setData(chat_model_m->index(newRow, 0),
             int(Qt::AlignLeft | Qt::AlignVCenter), Qt::TextAlignmentRole);
     chat_model_m->setData(chat_model_m->index(newRow, 0), font_m, Qt::FontRole);
@@ -159,15 +173,11 @@ void ChatWindow::message_received(const QString &sender, const QString &type,
 
 void ChatWindow::send_message()
 {
+    auto now = std::chrono::system_clock::to_time_t(
+            std::chrono::system_clock::now());
+    auto timestamp = QString::fromStdString(print_time(now));
     chat_client_m->send_message(TYPE_MSG, ui_m->messageEdit->text());
-    const int newRow = chat_model_m->rowCount();
-    chat_model_m->insertRow(newRow);
-    chat_model_m->setData(chat_model_m->index(newRow, 0), ui_m->messageEdit->text());
-    chat_model_m->setData(chat_model_m->index(newRow, 0),
-            int(Qt::AlignRight | Qt::AlignVCenter), Qt::TextAlignmentRole);
     ui_m->messageEdit->clear();
-    ui_m->chatView->scrollToBottom();
-    last_username_m.clear();
 }
 
 void ChatWindow::user_joined(const QString &username)

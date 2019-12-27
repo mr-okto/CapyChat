@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'chatwindow.ui'
 **
-** Created by: Qt User Interface Compiler version 5.9.5
+** Created by: Qt User Interface Compiler version 5.12.2
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
 ********************************************************************************/
@@ -10,11 +10,8 @@
 #define UI_CHATWINDOW_H
 
 #include <QtCore/QVariant>
-#include <QtWidgets/QAction>
 #include <QtWidgets/QApplication>
-#include <QtWidgets/QButtonGroup>
 #include <QtWidgets/QGridLayout>
-#include <QtWidgets/QHeaderView>
 #include <QtWidgets/QLineEdit>
 #include <QtWidgets/QListView>
 #include <QtWidgets/QPushButton>
@@ -34,30 +31,30 @@ public:
     void setupUi(QWidget *ChatWindow)
     {
         if (ChatWindow->objectName().isEmpty())
-            ChatWindow->setObjectName(QStringLiteral("ChatWindow"));
+            ChatWindow->setObjectName(QString::fromUtf8("ChatWindow"));
         ChatWindow->resize(400, 300);
         gridLayout = new QGridLayout(ChatWindow);
-        gridLayout->setObjectName(QStringLiteral("gridLayout"));
+        gridLayout->setObjectName(QString::fromUtf8("gridLayout"));
         connectButton = new QPushButton(ChatWindow);
-        connectButton->setObjectName(QStringLiteral("connectButton"));
+        connectButton->setObjectName(QString::fromUtf8("connectButton"));
 
         gridLayout->addWidget(connectButton, 0, 0, 1, 2);
 
         chatView = new QListView(ChatWindow);
-        chatView->setObjectName(QStringLiteral("chatView"));
+        chatView->setObjectName(QString::fromUtf8("chatView"));
         chatView->setEnabled(false);
         chatView->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
         gridLayout->addWidget(chatView, 1, 0, 1, 2);
 
         messageEdit = new QLineEdit(ChatWindow);
-        messageEdit->setObjectName(QStringLiteral("messageEdit"));
+        messageEdit->setObjectName(QString::fromUtf8("messageEdit"));
         messageEdit->setEnabled(false);
 
         gridLayout->addWidget(messageEdit, 2, 0, 1, 1);
 
         sendButton = new QPushButton(ChatWindow);
-        sendButton->setObjectName(QStringLiteral("sendButton"));
+        sendButton->setObjectName(QString::fromUtf8("sendButton"));
         sendButton->setEnabled(false);
 
         gridLayout->addWidget(sendButton, 2, 1, 1, 1);
@@ -73,9 +70,9 @@ public:
 
     void retranslateUi(QWidget *ChatWindow)
     {
-        ChatWindow->setWindowTitle(QApplication::translate("ChatWindow", "Capy Chat", Q_NULLPTR));
-        connectButton->setText(QApplication::translate("ChatWindow", "Connect to new room", Q_NULLPTR));
-        sendButton->setText(QApplication::translate("ChatWindow", "Send", Q_NULLPTR));
+        ChatWindow->setWindowTitle(QApplication::translate("ChatWindow", "Capy Chat", nullptr));
+        connectButton->setText(QApplication::translate("ChatWindow", "Connect to new room", nullptr));
+        sendButton->setText(QApplication::translate("ChatWindow", "Send", nullptr));
     } // retranslateUi
 
 };

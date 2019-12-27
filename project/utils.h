@@ -3,8 +3,9 @@
 
 #include <opendht.h>
 
-#define BOOTSTRAP_IP "3.121.25.185"
+#define BOOTSTRAP_IP "capy.site"
 #define TYPE_MSG "message"
+#define TYPE_MY_MSG "my_message"
 #define TYPE_LEFT "user_left"
 #define TYPE_CONNECTED "user_connected"
 

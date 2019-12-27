@@ -19,6 +19,7 @@ private:
     ChatClient *chat_client_m;
     QStandardItemModel *chat_model_m;
     QString last_username_m;
+    QString room_name_m;
     QFont font_m;
 private slots:
     void connection_to_other_room();
