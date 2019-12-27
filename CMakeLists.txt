@@ -14,16 +14,16 @@ find_package(GnuTLS REQUIRED)
 find_package(opendht REQUIRED)
 find_package(Qt5 COMPONENTS Core Widgets Network Gui REQUIRED)
 
-include_directories(/usr/local/include ./include)
-link_directories(/usr/local/lib /usr/lib/x86_64-linux-gnu/ /usr/lib/gcc/x86_64-linux-gnu/8/)
+include_directories(/usr/local/include project/include)
+link_directories(/usr/local/lib project/src)
 
 add_executable(chat
         project/chatwindow.ui
-        project/chatclient.cpp
-        project/chatwindow.cpp
-        project/clientmain.cpp
-        project/utils.cpp
-        project/node_tools.cpp
-        project/popup.cpp)
+        project/src/chatclient.cpp
+        project/src/chatwindow.cpp
+        project/src/clientmain.cpp
+        project/src/utils.cpp
+        project/src/node_tools.cpp
+        project/src/popup.cpp)
 
 target_link_libraries(chat libc.a Qt5::Widgets Qt5::Network Qt5::Core Qt5::Gui readline opendht gnutls libstdc++fs.a libstdc++.a libgcc.a libpthread.a)
