@@ -20,6 +20,7 @@ ChatWindow::ChatWindow(QWidget *parent)
     , room_name_m()
     {
     ui_m->setupUi(this);
+    notif_m = new PopUp;
     chat_model_m->insertColumn(0);
     ui_m->chatView->setModel(chat_model_m);
 
@@ -114,6 +115,8 @@ void ChatWindow::logged_in()
     ui_m->sendButton->setEnabled(true);
     ui_m->messageEdit->setEnabled(true);
     ui_m->chatView->setEnabled(true);
+    setup_time_m = std::chrono::system_clock::to_time_t(
+            std::chrono::system_clock::now());
     last_username_m.clear();
 }
 
@@ -164,11 +167,19 @@ void ChatWindow::message_received(const QString &sender, const QString &type,
     } else {
         chat_model_m->insertRow(newRow);
     }
+
     chat_model_m->setData(chat_model_m->index(newRow, 0)," (" + timestamp + "): " + text);
     chat_model_m->setData(chat_model_m->index(newRow, 0),
             int(Qt::AlignLeft | Qt::AlignVCenter), Qt::TextAlignmentRole);
     chat_model_m->setData(chat_model_m->index(newRow, 0), font_m, Qt::FontRole);
     ui_m->chatView->scrollToBottom();
+
+    if (std::chrono::system_clock::to_time_t(std::chrono::system_clock::now())
+            - setup_time_m > 1)
+    {
+        notif_m->setPopupText(sender + ": " + text);
+        notif_m->show();
+    }
 }
 
 void ChatWindow::send_message()

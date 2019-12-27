@@ -3,6 +3,9 @@
 
 #include <QWidget>
 #include <QAbstractSocket>
+
+#include "popup.h"
+
 class ChatClient;
 class QStandardItemModel;
 namespace Ui { class ChatWindow; }
@@ -21,6 +24,8 @@ private:
     QString last_username_m;
     QString room_name_m;
     QFont font_m;
+    PopUp *notif_m;
+    long setup_time_m;
 private slots:
     void connection_to_other_room();
     void attempt_connection();
